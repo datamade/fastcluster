@@ -242,6 +242,8 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
   long int N_ = 0;
   unsigned char method;
 
+  printf("FUNCTION: linkage_wrap(N,D,Z) CALLED\n");
+  
   try{
 #if HAVE_DIAGNOSTIC
 #pragma GCC diagnostic push
@@ -255,6 +257,17 @@ static PyObject *linkage_wrap(PyObject * const, PyObject * const args) {
                           &method)) {        // unsigned char
       return NULL; // Error if the arguments have the wrong type.
     }
+    //float *df = (float*)PyArray_DATA(D);
+    printf("N is %ld\n ", N_);
+
+    //double  *df = (double*)PyArray_DATA(D);
+    //printf("First element of D (aka X?) is %lf\n ", df[0]);
+    float *df = (float*)PyArray_DATA(D);
+    printf("First element of D (aka X?) is %f\n ", df[0]);
+
+    fflush(stdout);
+
+    
 #if HAVE_DIAGNOSTIC
 #pragma GCC diagnostic pop
 #endif
@@ -1080,6 +1093,7 @@ static PyObject *linkage_vector_wrap(PyObject * const, PyObject * const args) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif
+    printf("FUNCTION: linkage_vector_wrap()\n");
     if (!PyArg_ParseTuple(args, "O!O!bbO",
                           &PyArray_Type, &X, // NumPy array
                           &PyArray_Type, &Z, // NumPy array
@@ -1088,6 +1102,9 @@ static PyObject *linkage_vector_wrap(PyObject * const, PyObject * const args) {
                           &extraarg )) {     // Python object
       return NULL;
     }
+    float *xf = (float*)PyArray_DATA(X);
+    printf("First element of X is %f\n ", xf[0]);
+    fflush(stdout);
 #if HAVE_DIAGNOSTIC
 #pragma GCC diagnostic pop
 #endif

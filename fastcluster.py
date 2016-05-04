@@ -230,7 +230,8 @@ and simply ignores the mask.'''
     if X.ndim==1:
         if method=='single':
             preserve_input = False
-        X = array(X, dtype=double, copy=preserve_input, order='C', subok=True)
+        #X = array(X, dtype=double, copy=preserve_input, order='C', subok=True)
+        X = array(X, dtype='f4', copy=preserve_input, order='C', subok=True)
         NN = len(X)
         N = int(ceil(sqrt(NN*2)))
         if (N*(N-1)//2) != NN:
@@ -240,10 +241,14 @@ and simply ignores the mask.'''
         assert X.ndim==2
         N = len(X)
         X = pdist(X, metric)
-        X = array(X, dtype=double, copy=False, order='C', subok=True)
-    Z = empty((N-1,4))
+        #X = array(X, dtype=double, copy=False, order='C', subok=True)
+        X = array(X, dtype='f4', copy=False, order='C', subok=True)
+    Z = empty((N-1,4), dtype='f4')
     if N > 1:
+        ###print ("N is ",N)
+        ###print ("X is ",X)
         linkage_wrap(N, X, Z, mthidx[method])
+        ###print ("linkage_wrap returns with Z=",Z)
     return Z
 
 # This dictionary must agree with the enum metric_codes in fastcluster_python.cpp.
@@ -459,26 +464,32 @@ metric='sokalmichener' is an alias for 'matching'.'''
         assert metric!='USER'
         if metric in ('hamming', 'jaccard'):
             X = array(X, copy=False, subok=True)
-            dtype = bool if X.dtype==bool else double
+            #dtype = bool if X.dtype==bool else double
+            dtype = bool if X.dtype==bool else 'f4'
         else:
-            dtype = bool if metric in booleanmetrics else double
+            #dtype = bool if metric in booleanmetrics else double
+            dtype = bool if metric in booleanmetrics else 'f4'
         X = array(X, dtype=dtype, copy=False, order='C', subok=True)
     else:
         assert metric=='euclidean'
-        X = array(X, dtype=double, copy=(method=='ward'), order='C', subok=True)
+        #X = array(X, dtype=double, copy=(method=='ward'), order='C', subok=True)
+        X = array(X, dtype='f4', copy=(method=='ward'), order='C', subok=True)
     assert X.ndim==2
     N = len(X)
-    Z = empty((N-1,4))
+    Z = empty((N-1,4), dtype='f4')
 
     if metric=='seuclidean':
         if extraarg is None:
-            extraarg = var(X, axis=0, ddof=1)
+            #extraarg = var(X, axis=0, ddof=1)
+            extraarg = var(X, axis=0, ddof=1, dtype='f4')
     elif metric=='mahalanobis':
         if extraarg is None:
-            extraarg = inv(cov(X, rowvar=False))
+            #extraarg = inv(cov(X, rowvar=False))
+            extraarg = inv(cov(X, rowvar=False, dtype='f4'))
         # instead of the inverse covariance matrix, pass the matrix product
         # with the data matrix!
-        extraarg = array(dot(X,extraarg),dtype=double, copy=False, order='C', subok=True)
+        #extraarg = array(dot(X,extraarg),dtype=double, copy=False, order='C', subok=True)
+        extraarg = array(dot(X,extraarg),dtype='f4', copy=False, order='C', subok=True)
     elif metric=='correlation':
         X = X-expand_dims(X.mean(axis=1),1)
         metric='cosine'

@@ -31,13 +31,16 @@ seed  = np.random.randint(0,1e9)
 
 print_seed()
 np.random.seed(seed)
-abstol = 1e-14 # absolute tolerance
-rtol = 1e-13 # relative tolerance
+#abstol = 1e-14 # absolute tolerance
+abstol = 1e-6 # absolute tolerance
+#rtol = 1e-13 # relative tolerance
+rtol = 1e-6 # relative tolerance
 
 # NaN values are used in computations. Do not warn about them.
 np.seterr(invalid='ignore')
 
 def correct_for_zero_vectors(D, pcd, metric):
+    sys.stdout.write ("FUNCTION: correct_for_zero_vectors()\n");
     # Correct some metrics: we want the distance from the zero vector
     # to itself to be 0, not NaN.
     if metric in ('jaccard', 'dice', 'sokalsneath'):
@@ -68,21 +71,24 @@ def test_all(n,dim):
     sys.stdout.write("Metric: " + metric + "...")
     D = pdist(pcd, metric)
     D = correct_for_zero_vectors(D, pcd, metric)
-
+    D2 = np.array(D, dtype='f4')
+    
     try:
         Z2 = fc.linkage_vector(pcd, method, metric)
     except FloatingPointError:
         # If linkage_vector reported a NaN dissimilarity value,
         # check whether the distance matrix really contains NaN.
-        if np.any(np.isnan(D)):
-            print("Skip this test: NaN dissimilarity value.")
+        #if np.any(np.isnan(D)):
+        if np.any(np.isnan(D2)):
+            sys.stdout.write("Skip this test: NaN dissimilarity value.\n")
             continue
         else:
             raise AssertionError('"linkage_vector" erroneously reported NaN.')
 
     if np.any(pcd2!=pcd):
       raise AssertionError('Input array was corrupted.', pcd)
-    check(Z2, method, D)
+    sys.stdout.write ("CHECKING...\n")
+    check(Z2, method, D2)
 
   # metrics for real vectors
   bound = math.sqrt(n)
@@ -93,10 +99,10 @@ def test_all(n,dim):
                  # canberra: see bug in older Scipy versions
                  # http://projects.scipy.org/scipy/ticket/1430
                  'braycurtis', 'seuclidean', 'mahalanobis', 'user']:
-    sys.stdout.write("Metric: " + metric + "...")
+    sys.stdout.write("Metric: " + metric + "...\n")
     if metric=='minkowski':
         p = np.random.uniform(1.,10.)
-        sys.stdout.write("p: " + str(p) + "...")
+        sys.stdout.write("p: " + str(p) + "...\n")
         D = pdist(pcd, metric, p)
         Z2 = fc.linkage_vector(pcd, method, metric, p)
     elif metric=='user':
@@ -125,7 +131,7 @@ def test_all(n,dim):
     check(Z2, method, D)
 
 def check(Z2, method, D):
-    sys.stdout.write("Method: " + method + "...")
+    sys.stdout.write("FUNCTION: check(), method: " + method + "...")
     I = np.array(Z2[:,:2], dtype=int)
 
     Ds = squareform(D)
@@ -222,6 +228,7 @@ def check(Z2, method, D):
     print('OK.')
 
 def test(repeats):
+    sys.stdout.write("vectortest.TEST("+str(repeats)+")\n")
     if repeats:
         iterator = range(repeats)
     else:
